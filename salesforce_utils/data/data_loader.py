@@ -3,7 +3,7 @@ import pdb
 
 import requests
 from salesforce_bulk import SalesforceBulk, CsvDictsAdapter
-from salesforce_data_generator import Salesforce
+from salesforce_utils import SalesforceBatch
 import record_generator
 
 def gen_Contact(count):
@@ -77,7 +77,7 @@ def gen_Account(count):
 
 def load_records(test=False, target="Contact1000__c", count=10, batch_size=10000):
     password = raw_input("Password: ")
-    sf = Salesforce(username="scottp+test@heroku.com", password=password)
+    sf = SalesforceBatch(username="scottp+test@heroku.com", password=password)
 
     user_ids = [r.Id for r in sf.query_salesforce("User", ["Id"], where="ReceivesAdminInfoEmails=true", limit=20).records]
     print "User ids: " + str(user_ids)
