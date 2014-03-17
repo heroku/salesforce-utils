@@ -76,7 +76,8 @@ def gen_Account(count):
 
 
 def load_records(test=False, target="Contact1000__c", count=10, batch_size=10000):
-    sf = Salesforce(username="scottp+test@heroku.com", password="rocket14")
+    password = raw_input("Password: ")
+    sf = Salesforce(username="scottp+test@heroku.com", password=password)
 
     user_ids = [r.Id for r in sf.query_salesforce("User", ["Id"], where="ReceivesAdminInfoEmails=true", limit=20).records]
     print "User ids: " + str(user_ids)
