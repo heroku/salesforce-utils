@@ -53,9 +53,11 @@ types = """
 TYPES = Enum(*types.split())
 FIELD_VALUE_FUNCS = dict()
 
-def define_lookup(type_name, random_choices=None):
+def define_lookup(type_name, random_choices=None, callable = None):
     if random_choices:
         FIELD_VALUE_FUNCS[type_name] = partial(random.choice, random_choices)
+    elif callable:
+        FIELD_VALUE_FUNCS[type_name] = callable
 
 
 def mock_record(field_list, defaults={}, count=None):
@@ -189,6 +191,9 @@ def field_value(type):
         return val
     except (KeyError, IndexError):
         return type
+    except TypeError:
+        print "Error trying to get field of type '{0}'".format(type)
+        raise
 
 def typegen(type):
     def save_func(f):

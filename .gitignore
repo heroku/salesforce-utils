@@ -2,3 +2,4 @@ salesforce_utils.egg-info*
 */salesforce_utils.egg-info/*
 build/*
 dist/*
+*pyc
