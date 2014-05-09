@@ -22,8 +22,8 @@ requires = [
     'enum>=0.4.4',
     'requests>=2.2.1',
     'salesforce-python-toolkit>=0.1.3',
-    'salesforce-oauth-request>=1.0.1',
-    'salesforce-bulk>=1.0.0',
+    'salesforce-oauth-request>=1.0.5',
+    'salesforce-bulk>=1.0.5',
 ]
 
 with open('README.md') as f:
