@@ -33,7 +33,7 @@ with open('LICENSE') as f:
 
 setup(
     name='salesforce-utils',
-    version='1.0.1',
+    version='1.0.2',
     description='Utilities for using the Salesforce.com SOAP API and loading test data.',
     long_description=readme,
     author='Scott Persinger',
