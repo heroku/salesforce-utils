@@ -1,4 +1,5 @@
 __author__ = 'spersinger'
+import os
 import pdb
 import json
 from datetime import datetime
@@ -78,10 +79,15 @@ def gen_Account(count):
 
 
 
-def load_records(test=False, target="Contact1000__c", count=10, batch_size=10000):
+def load_records(test=False, target="Contact1000__c", count=10, batch_size=100000,
+                username="scottp+test@heroku.com", password=None, token=None,
+                sessionId=None, endpoint=None,
+                return_records=False):
     if not test:
-        password = raw_input("Password: ")
-        sf = SalesforceBatch(username="scottp+test@heroku.com", password=password)
+        if username and password:
+            sf = SalesforceBatch(username=username, password=password, token=token)
+        else:
+            sf = SalesforceBatch(sessionId=sessionId, endpoint=endpoint)
 
         user_ids = [r.Id for r in sf.query_salesforce("User", ["Id"], where="ReceivesAdminInfoEmails=true", limit=20).records]
         print "User ids: " + str(user_ids)
@@ -111,14 +117,20 @@ def load_records(test=False, target="Contact1000__c", count=10, batch_size=10000
 
     total = count
     batches = []
+    all_records = []
+
     while count > 0:
         if 'Contact' in target:
             records = gen_Contact(min(count,batch_size))
         else:
             records = gen_Account(min(count,batch_size))
         if test:
-            return records
+            return list(records)
 
+        if return_records:
+            records = list(records)
+            all_records += records
+            records = iter(records)
 
         if total < 1000:
             # Use SOAP
@@ -144,3 +156,5 @@ def load_records(test=False, target="Contact1000__c", count=10, batch_size=10000
     bulk.close_job(job)
 
     print "DONE!"
+    if return_records:
+        return all_records

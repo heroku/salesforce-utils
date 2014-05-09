@@ -27,7 +27,7 @@ import salesforce_oauth_request
 
 class SalesforceBatch(object):
     def __init__(self, tenant = None, sessionId=None, endpoint=None, 
-                 username=None, password=None, partner_wsdl=None):
+                 username=None, password=None, token=None, partner_wsdl=None):
 
         self.tenant = tenant
         self.sfclient = None
@@ -37,9 +37,13 @@ class SalesforceBatch(object):
             partner_wsdl = os.path.join(os.path.dirname(__file__), "partnerwsdl.xml")
 
         if username and password:
-            login = salesforce_oauth_request.login(username=username, password=password, cache_session=True)
-            sessionId = login['access_token']
-            endpoint = login['endpoint']
+            login = salesforce_oauth_request.login(username=username, password=password, 
+                                                    token=token, cache_session=True)
+            if 'access_token' in login:
+                sessionId = login['access_token']
+                endpoint = login['endpoint']
+            else:
+                raise RuntimeError("SF Login error: {0}".format(login))
 
         if sessionId:
             """This is the trick to use an OAuth access_token as the session id in the SOAP client."""

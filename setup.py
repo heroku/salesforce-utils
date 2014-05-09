@@ -14,6 +14,8 @@ if sys.argv[-1] == 'publish':
 
 packages = [
     'salesforce_utils',
+    'salesforce_utils.data',
+    'salesforce_utils.data.sources',
 ]
 
 requires = [
@@ -38,7 +40,8 @@ setup(
     author_email='scottp@heroku.com',
     url='https://github.com/heroku/salesforce-utils',
     packages=packages,
-    package_data={'': ['LICENSE']},
+    package_data={'': ['LICENSE'], 'salesforce_utils.data.sources' : ['*'],
+                    'salesforce_utils':['*.xml']},
     include_package_data=True,
     install_requires=requires,
     license=license,
