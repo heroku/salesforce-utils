@@ -1,7 +1,9 @@
 __author__ = 'spersinger'
 import os
+import sys
 import pdb
 import json
+import yaml
 from datetime import datetime
 
 import requests
@@ -82,7 +84,7 @@ def gen_Account(count):
 def load_records(test=False, target="Contact1000__c", count=10, batch_size=100000,
                 username="scottp+test@heroku.com", password=None, token=None,
                 sessionId=None, endpoint=None,
-                return_records=False):
+                return_records=False, field_spec = None):
     if not test:
         if username and password:
             sf = SalesforceBatch(username=username, password=password, token=token)
@@ -120,12 +122,17 @@ def load_records(test=False, target="Contact1000__c", count=10, batch_size=10000
     all_records = []
 
     while count > 0:
-        if 'Contact' in target:
-            records = gen_Contact(min(count,batch_size))
+        if field_spec:
+            records = record_generator.mock_records(field_spec, count=batch_size)
         else:
-            records = gen_Account(min(count,batch_size))
+            if 'Contact' in target:
+                records = gen_Contact(min(count,batch_size))
+            else:
+                records = gen_Account(min(count,batch_size))
         if test:
             return list(records)
+
+        print "Made batch of size {}".format(batch_size)
 
         if return_records:
             records = list(records)
@@ -139,7 +146,7 @@ def load_records(test=False, target="Contact1000__c", count=10, batch_size=10000
         else:
             csv_gen = CsvDictsAdapter(records)
 
-            print "Posting batch"
+            print "Posting batch to BULK API"
             batch = bulk.post_bulk_batch(job, csv_gen)
             print "Posted: %s" % batch
             batches.append(batch)
@@ -158,3 +165,29 @@ def load_records(test=False, target="Contact1000__c", count=10, batch_size=10000
     print "DONE!"
     if return_records:
         return all_records
+
+if __name__=='__main__':
+    if len(sys.argv) < 2:
+        print "Usage: data_loader <spec file> [<count>]"
+        print "Without a count a test record will be printed"
+    else:
+        spec = yaml.load(open(sys.argv[1]))
+        os.environ['SALESFORCE_CLIENT_ID'] = str(spec['sf_client_id'])
+        os.environ['SALESFORCE_CLIENT_SECRET'] = str(spec['sf_client_secret'])
+        os.environ['SALESFORCE_REDIRECT_URI'] = str(spec['sf_client_redirect'])
+
+        test=False
+        try:
+            count = int(sys.argv[2])
+        except IndexError:
+            test = True
+            count = 1
+
+        res = load_records(test=test, target=spec['object'], count=count, batch_size=3000,
+                username=spec['username'], password=spec['password'], token=spec['token'],
+                field_spec=spec['fields'])
+        if test:
+            for record in res:
+                print record
+                print "Record length: {}".format(len(json.dumps(record)))
+

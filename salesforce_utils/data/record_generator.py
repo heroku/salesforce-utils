@@ -96,7 +96,10 @@ def mock_record(field_list, defaults={}, count=None):
 
            "int street, city" -> 500 Main Street, San Francisco
     """
-    return dict([generate_field(field, defaults) for field in field_list])
+    if isinstance(field_list, dict):
+        return dict([generate_field({key:value}) for key,value in field_list.iteritems()])
+    else:
+        return dict([generate_field(field, defaults) for field in field_list])
 
 def mock_records(field_list, defaults={}, count=None):
     for x in xrange(count):
@@ -223,7 +226,7 @@ def genwords():
 
 @typegen(TYPES.titlewords)
 def genwords():
-    return [random.choice(WORDS).capitalize() for x in xrange(10)]
+    return [random.choice(WORDS).capitalize() for x in xrange(5000)]
 
 @typegen(TYPES.city)
 def gencity():
@@ -239,11 +242,13 @@ def genphone():
 
 @typegen(TYPES.datetime)
 def gendatetime():
-    return datetime.now().strftime('%Y-%m-%dT%H:%M:%S.000Z')
+    offset = random.randint(-100000, 0)
+    return (datetime.now() + timedelta(hours=offset)).strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
 @typegen(TYPES.date)
 def gendate():
-    return datetime.now().strftime("%Y-%m-%d")
+    offset = random.randint(-100000, 0)
+    return (datetime.now() + timedelta(hours=offset)).strftime("%Y-%m-%d")
 
 @typegen(TYPES.country)
 def genname():
